@@ -7,7 +7,7 @@ import (
 type trieNode struct {
 	count int
 	fail  *trieNode
-	child map[rune]*trieNode
+	child map[byte]*trieNode
 	index int
 }
 
@@ -15,105 +15,34 @@ func newTrieNode() *trieNode {
 	return &trieNode{
 		count: 0,
 		fail:  nil,
-		child: make(map[rune]*trieNode),
+		child: make(map[byte]*trieNode),
 		index: -1,
 	}
 }
 
-type Matcher struct {
-	root *trieNode
-	size int
+type ACAutomaton struct {
+	root       *trieNode
+	size       int
+	dictionary []string
 }
 
-type Term struct {
-	Index       int
-	EndPosition int
-}
+type Result map[string][]int
 
-func NewMatcher() *Matcher {
-	return &Matcher{
-		root: newTrieNode(),
-		size: 0,
+func NewACAutomaton(dictionary []string) *ACAutomaton {
+	m := &ACAutomaton{
+		root:       newTrieNode(),
+		size:       0,
+		dictionary: dictionary,
 	}
-}
-
-func BuildNewMatcher(dictionary []string) *Matcher {
-	m := &Matcher{
-		root: newTrieNode(),
-		size: 0,
-	}
-	m.Build(dictionary)
+	m.build()
 	return m
 }
 
-// initialize the ahocorasick
-func (m *Matcher) Build(dictionary []string) {
-	for i := range dictionary {
-		m.insert(dictionary[i])
+// initialize the Aho-Corasick Automaton
+func (m *ACAutomaton) build() {
+	for i := range m.dictionary {
+		m.insert(m.dictionary[i])
 	}
-	m.build()
-}
-
-// string match search
-// return all strings matched as indexes into the original dictionary and their positions on matched string
-func (m *Matcher) Match(s string) []*Term {
-	curNode := m.root
-	var p *trieNode = nil
-
-	mark := make([]bool, m.size)
-	ret := make([]*Term, 0)
-
-	for index, rune := range s {
-		for curNode.child[rune] == nil && curNode != m.root {
-			curNode = curNode.fail
-		}
-		curNode = curNode.child[rune]
-		if curNode == nil {
-			curNode = m.root
-		}
-
-		p = curNode
-		for p != m.root && p.count > 0 && !mark[p.index] {
-			mark[p.index] = true
-			for i := 0; i < p.count; i++ {
-				ret = append(ret, &Term{Index: p.index, EndPosition: index})
-			}
-			p = p.fail
-		}
-	}
-
-	return ret
-}
-
-// just return the number of len(Match(s))
-func (m *Matcher) GetMatchResultSize(s string) int {
-	curNode := m.root
-	var p *trieNode = nil
-
-	mark := make([]bool, m.size)
-	num := 0
-
-	for _, v := range s {
-		for curNode.child[v] == nil && curNode != m.root {
-			curNode = curNode.fail
-		}
-		curNode = curNode.child[v]
-		if curNode == nil {
-			curNode = m.root
-		}
-
-		p = curNode
-		for p != m.root && p.count > 0 && !mark[p.index] {
-			mark[p.index] = true
-			num += p.count
-			p = p.fail
-		}
-	}
-
-	return num
-}
-
-func (m *Matcher) build() {
 	ll := list.New()
 	ll.PushBack(m.root)
 	for ll.Len() > 0 {
@@ -141,9 +70,41 @@ func (m *Matcher) build() {
 	}
 }
 
-func (m *Matcher) insert(s string) {
+// string match search
+// return all strings matched as indexes into the original dictionary and their positions on matched string
+func (m *ACAutomaton) FindAllIndex(s string) (res Result) {
 	curNode := m.root
-	for _, v := range s {
+	var p *trieNode = nil
+
+	res = make(map[string][]int)
+
+	for index, b := range []byte(s) {
+		for curNode.child[b] == nil && curNode != m.root {
+			curNode = curNode.fail
+		}
+		curNode = curNode.child[b]
+		if curNode == nil {
+			curNode = m.root
+		}
+
+		p = curNode
+		for p != m.root && p.count > 0 { //&& !mark[p.index]
+			// mark[p.index] = true
+			for i := 0; i < p.count; i++ {
+				term := m.dictionary[p.index]
+				startPos := index - len(term) + 1
+				res[term] = append(res[term], startPos)
+			}
+			p = p.fail
+		}
+	}
+
+	return res
+}
+
+func (m *ACAutomaton) insert(s string) {
+	curNode := m.root
+	for _, v := range []byte(s) {
 		if curNode.child[v] == nil {
 			curNode.child[v] = newTrieNode()
 		}

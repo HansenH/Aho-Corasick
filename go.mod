@@ -1,3 +1,3 @@
-module github.com/gansidui/ahocorasick
+module github.com/HansenH/Aho-Corasick
 
-go 1.13
+go 1.19
