@@ -20,7 +20,7 @@ func newTrieNode() *trieNode {
 	}
 }
 
-type acAutomaton struct {
+type ACAutomaton struct {
 	root       *trieNode
 	size       int
 	dictionary []string
@@ -29,8 +29,8 @@ type acAutomaton struct {
 type result map[string][]int
 
 // Construct the Model with a certain dictionary
-func NewACAutomaton(dictionary []string) *acAutomaton {
-	m := &acAutomaton{
+func NewACAutomaton(dictionary []string) *ACAutomaton {
+	m := &ACAutomaton{
 		root:       newTrieNode(),
 		size:       0,
 		dictionary: dictionary,
@@ -40,7 +40,7 @@ func NewACAutomaton(dictionary []string) *acAutomaton {
 }
 
 // Initialize the Aho-Corasick Automaton
-func (m *acAutomaton) build() {
+func (m *ACAutomaton) build() {
 	for i := range m.dictionary {
 		m.insert(m.dictionary[i])
 	}
@@ -70,7 +70,7 @@ func (m *acAutomaton) build() {
 	}
 }
 
-func (m *acAutomaton) insert(s string) {
+func (m *ACAutomaton) insert(s string) {
 	curNode := m.root
 	for _, v := range []byte(s) {
 		if curNode.child[v] == nil {
@@ -84,7 +84,7 @@ func (m *acAutomaton) insert(s string) {
 }
 
 // Search all the matched positions of all patterns
-func (m *acAutomaton) FindAllIndex(s string) (res result) {
+func (m *ACAutomaton) FindAllIndex(s string) (res result) {
 	curNode := m.root
 	var p *trieNode = nil
 	res = make(map[string][]int)
