@@ -26,8 +26,6 @@ type ACAutomaton struct {
 	dictionary []string
 }
 
-type result map[string][]int
-
 // Construct the Model with a certain dictionary
 func NewACAutomaton(dictionary []string) *ACAutomaton {
 	m := &ACAutomaton{
@@ -84,7 +82,7 @@ func (m *ACAutomaton) insert(s string) {
 }
 
 // Search all the matched positions of all patterns
-func (m *ACAutomaton) FindAllIndex(s string) (res result) {
+func (m *ACAutomaton) FindAllIndex(s string) (res map[string][]int) {
 	curNode := m.root
 	var p *trieNode = nil
 	res = make(map[string][]int)
