@@ -2,12 +2,14 @@
 
 Aho-Corasick Multi-pattern Matching Algorithm for Golang
 
+Example:
+
 ``` go
 package main
 
 import (
 	"fmt"
-	"github.com/HansenH/Aho-Corasick"
+	ahocorasick "github.com/HansenH/Aho-Corasick"
 )
 
 func main() {

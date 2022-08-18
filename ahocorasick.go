@@ -28,6 +28,7 @@ type ACAutomaton struct {
 
 type Result map[string][]int
 
+// Construct the Model with a certain dictionary
 func NewACAutomaton(dictionary []string) *ACAutomaton {
 	m := &ACAutomaton{
 		root:       newTrieNode(),
@@ -38,7 +39,7 @@ func NewACAutomaton(dictionary []string) *ACAutomaton {
 	return m
 }
 
-// initialize the Aho-Corasick Automaton
+// Initialize the Aho-Corasick Automaton
 func (m *ACAutomaton) build() {
 	for i := range m.dictionary {
 		m.insert(m.dictionary[i])
@@ -48,7 +49,6 @@ func (m *ACAutomaton) build() {
 	for ll.Len() > 0 {
 		temp := ll.Remove(ll.Front()).(*trieNode)
 		var p *trieNode = nil
-
 		for i, v := range temp.child {
 			if temp == m.root {
 				v.fail = m.root
@@ -70,38 +70,6 @@ func (m *ACAutomaton) build() {
 	}
 }
 
-// string match search
-// return all strings matched as indexes into the original dictionary and their positions on matched string
-func (m *ACAutomaton) FindAllIndex(s string) (res Result) {
-	curNode := m.root
-	var p *trieNode = nil
-
-	res = make(map[string][]int)
-
-	for index, b := range []byte(s) {
-		for curNode.child[b] == nil && curNode != m.root {
-			curNode = curNode.fail
-		}
-		curNode = curNode.child[b]
-		if curNode == nil {
-			curNode = m.root
-		}
-
-		p = curNode
-		for p != m.root && p.count > 0 { //&& !mark[p.index]
-			// mark[p.index] = true
-			for i := 0; i < p.count; i++ {
-				term := m.dictionary[p.index]
-				startPos := index - len(term) + 1
-				res[term] = append(res[term], startPos)
-			}
-			p = p.fail
-		}
-	}
-
-	return res
-}
-
 func (m *ACAutomaton) insert(s string) {
 	curNode := m.root
 	for _, v := range []byte(s) {
@@ -113,4 +81,32 @@ func (m *ACAutomaton) insert(s string) {
 	curNode.count++
 	curNode.index = m.size
 	m.size++
+}
+
+// Search all the matched positions of all patterns
+func (m *ACAutomaton) FindAllIndex(s string) (res Result) {
+	curNode := m.root
+	var p *trieNode = nil
+	res = make(map[string][]int)
+
+	for index, b := range []byte(s) {
+		for curNode.child[b] == nil && curNode != m.root {
+			curNode = curNode.fail
+		}
+		curNode = curNode.child[b]
+		if curNode == nil {
+			curNode = m.root
+		}
+		p = curNode
+		for p != m.root && p.count > 0 { //&& !mark[p.index]
+			// mark[p.index] = true
+			for i := 0; i < p.count; i++ {
+				term := m.dictionary[p.index]
+				startPos := index - len(term) + 1
+				res[term] = append(res[term], startPos)
+			}
+			p = p.fail
+		}
+	}
+	return res
 }
