@@ -82,10 +82,10 @@ func (m *ACAutomaton) insert(s string) {
 }
 
 // Search all the matched positions of all patterns
-func (m *ACAutomaton) FindAllIndex(s string) (res map[string][]int) {
+func (m *ACAutomaton) FindAllIndex(s string) map[string][]int {
 	curNode := m.root
 	var p *trieNode = nil
-	res = make(map[string][]int)
+	res := make(map[string][]int)
 
 	for index, b := range []byte(s) {
 		for curNode.child[b] == nil && curNode != m.root {
