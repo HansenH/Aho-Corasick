@@ -25,6 +25,10 @@ Output:
 map[ :[12 18 26 32 39 41 46] !!:[53 54] golang:[47] google:[19] hello:[0 13 27] l:[42] love:[42] world:[33] 世界:[5]]
 ```
 
+### Benchmark
+
+[Aho-Corasick-Benchmark](https://github.com/HansenH/Aho-Corasick-Benchmark)
+
 ## LICENSE
 
 MIT
